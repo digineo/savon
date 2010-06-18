@@ -244,7 +244,7 @@ module Savon
     def to_xml
       unless @xml
         @builder.instruct!
-        @xml = @builder.env :Envelope, merged_namespaces do |xml|
+        @xml = @builder.env :Envelope, merged_namespaces.reject{|k,v| k=="xmlns:wsdl"} do |xml|
           xml.env(:Header) { xml << merged_header } unless merged_header.empty?
           xml_body xml
         end
@@ -273,8 +273,11 @@ module Savon
 
     # Adds a SOAP XML body to a given +xml+ Object.
     def xml_body(xml)
+      content_attr  = input_array
+      content_attr += [{'xmlns:wsdl'=>namespaces["xmlns:wsdl"]}] if namespaces["xmlns:wsdl"]
+      
       xml.env(:Body) do
-        xml.tag!(:wsdl, *input_array) { xml << (@body.to_soap_xml rescue @body.to_s) }
+        xml.tag!(:wsdl, *content_attr) { xml << (@body.to_soap_xml rescue @body.to_s) }
       end
     end
 
