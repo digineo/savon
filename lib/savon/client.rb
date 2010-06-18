@@ -115,6 +115,11 @@ module Savon
       @soap, @wsse = SOAP.new(action, input, soap_endpoint), WSSE.new
       yield_objects &block if block
       @soap.namespaces["xmlns:wsdl"] ||= @wsdl.namespace_uri if @wsdl.enabled?
+
+      # TODO: Use XML Schema Types extensively -- and not only for nil values... ;-)
+      @soap.namespaces["xmlns:xsd"] ||= "http://www.w3.org/2001/XMLSchema"
+      @soap.namespaces["xmlns:xsi"] ||= "http://www.w3.org/2001/XMLSchema-instance"
+
       @soap.wsse = @wsse
     end
 

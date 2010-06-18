@@ -68,6 +68,7 @@ class Hash
       case value
         when Array then xml << value.to_soap_xml(key, escape_xml, attrs)
         when Hash  then xml.tag!("wsdl", key.to_sym, attrs) { xml << value.to_soap_xml }
+        when NilClass then xml.tag!("wsdl", key.to_sym, "xsi:nil"=>"true")
         else            xml.tag!("wsdl", key.to_sym, attrs) { xml << (escape_xml ? value.to_soap_value : value.to_soap_value!) }
       end
     end

@@ -80,9 +80,11 @@ describe Hash do
     end
 
     it "should call to_s on any other Object" do
-      [666, true, false, nil].each do |object|
+      [666, true, false].each do |object|
         { :some => object }.to_soap_xml.should == "<wsdl:some>#{object}</wsdl:some>"
       end
+
+      { :some => nil }.to_soap_xml.should == "<wsdl:some xsi:nil=\"true\"/>"
     end
 
     it "should default to escape special characters" do

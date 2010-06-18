@@ -8,6 +8,7 @@ class Array
       attrs = tag_attributes attributes, index
       case item
         when Hash then xml.tag!("wsdl", key.to_sym, attrs) { xml << item.to_soap_xml }
+        when NilClass then xml.tag!("wsdl", key.to_sym, "xsi:nil"=>"true")
         else           xml.tag!("wsdl", key.to_sym, attrs) { xml << (escape_xml ? item.to_soap_value : item.to_soap_value!) }
       end
     end
