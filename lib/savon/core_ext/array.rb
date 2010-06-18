@@ -7,8 +7,8 @@ class Array
     each_with_index do |item, index|
       attrs = tag_attributes attributes, index
       case item
-        when Hash then xml.tag!(key, attrs) { xml << item.to_soap_xml }
-        else           xml.tag!(key, attrs) { xml << (escape_xml ? item.to_soap_value : item.to_soap_value!) }
+        when Hash then xml.tag!("wsdl", key.to_sym, attrs) { xml << item.to_soap_xml }
+        else           xml.tag!("wsdl", key.to_sym, attrs) { xml << (escape_xml ? item.to_soap_value : item.to_soap_value!) }
       end
     end
 

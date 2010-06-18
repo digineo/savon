@@ -17,46 +17,46 @@ describe Hash do
   describe "to_soap_xml" do
     describe "should return SOAP request compatible XML" do
       it "for a simple Hash" do
-        hash, result = { :some => "user" }, "<some>user</some>"
+        hash, result = { :some => "user" }, "<wsdl:some>user</wsdl:some>"
         hash.to_soap_xml.should == result
       end
 
       it "for a nested Hash" do
-        hash, result = { :some => { :new => "user" } }, "<some><new>user</new></some>"
+        hash, result = { :some => { :new => "user" } }, "<wsdl:some><wsdl:new>user</wsdl:new></wsdl:some>"
         hash.to_soap_xml.should == result
       end
 
       it "for a Hash with multiple keys" do
         hash = { :all => "users", :before => "whatever" }
-        hash.to_soap_xml.should include("<all>users</all>", "<before>whatever</before>")
+        hash.to_soap_xml.should include("<wsdl:all>users</wsdl:all>", "<wsdl:before>whatever</wsdl:before>")
       end
 
       it "for a Hash containing an Array" do
-        hash, result = { :some => ["user", "gorilla"] }, "<some>user</some><some>gorilla</some>"
+        hash, result = { :some => ["user", "gorilla"] }, "<wsdl:some>user</wsdl:some><wsdl:some>gorilla</wsdl:some>"
         hash.to_soap_xml.should == result
       end
 
       it "for a Hash containing an Array of Hashes" do
         hash = { :some => [{ :new => "user" }, { :old => "gorilla" }] }
-        result = "<some><new>user</new></some><some><old>gorilla</old></some>"
+        result = "<wsdl:some><wsdl:new>user</wsdl:new></wsdl:some><wsdl:some><wsdl:old>gorilla</wsdl:old></wsdl:some>"
 
         hash.to_soap_xml.should == result
       end
     end
 
     it "should convert Hash key Symbols to lowerCamelCase" do
-      hash, result = { :find_or_create => "user" }, "<findOrCreate>user</findOrCreate>"
+      hash, result = { :find_or_create => "user" }, "<wsdl:findOrCreate>user</wsdl:findOrCreate>"
       hash.to_soap_xml.should == result
     end
 
     it "should not convert Hash key Strings" do
-      hash, result = { "find_or_create" => "user" }, "<find_or_create>user</find_or_create>"
+      hash, result = { "find_or_create" => "user" }, "<wsdl:find_or_create>user</wsdl:find_or_create>"
       hash.to_soap_xml.should == result
     end
 
     it "should convert DateTime objects to xs:dateTime compliant Strings" do
       hash = { :before => DateTime.new(2012, 03, 22, 16, 22, 33) }
-      result = "<before>2012-03-22T16:22:33Z</before>"
+      result = "<wsdl:before>2012-03-22T16:22:33Z</wsdl:before>"
 
       hash.to_soap_xml.should == result
     end
@@ -67,7 +67,7 @@ describe Hash do
         DateTime.new(2012, 03, 22, 16, 22, 33)
       end
 
-      hash, result = { :before => singleton }, "<before>2012-03-22T16:22:33Z</before>"
+      hash, result = { :before => singleton }, "<wsdl:before>2012-03-22T16:22:33Z</wsdl:before>"
       hash.to_soap_xml.should == result
     end
 
@@ -75,35 +75,35 @@ describe Hash do
       object = "gorilla"
       object.expects(:to_datetime).never
 
-      hash, result = { :name => object }, "<name>gorilla</name>"
+      hash, result = { :name => object }, "<wsdl:name>gorilla</wsdl:name>"
       hash.to_soap_xml.should == result
     end
 
     it "should call to_s on any other Object" do
       [666, true, false, nil].each do |object|
-        { :some => object }.to_soap_xml.should == "<some>#{object}</some>"
+        { :some => object }.to_soap_xml.should == "<wsdl:some>#{object}</wsdl:some>"
       end
     end
 
     it "should default to escape special characters" do
       result = { :some => { :nested => "<tag />" }, :tag => "<tag />" }.to_soap_xml
-      result.should include("<tag>&lt;tag /&gt;</tag>")
-      result.should include("<some><nested>&lt;tag /&gt;</nested></some>")
+      result.should include("<wsdl:tag>&lt;tag /&gt;</wsdl:tag>")
+      result.should include("<wsdl:some><wsdl:nested>&lt;tag /&gt;</wsdl:nested></wsdl:some>")
     end
 
     it "should not escape special characters for keys marked with an exclamation mark" do
       result = { :some => { :nested! => "<tag />" }, :tag! => "<tag />" }.to_soap_xml
-      result.should include("<tag><tag /></tag>")
-      result.should include("<some><nested><tag /></nested></some>")
+      result.should include("<wsdl:tag><tag /></wsdl:tag>")
+      result.should include("<wsdl:some><wsdl:nested><tag /></wsdl:nested></wsdl:some>")
     end
 
     it "should preserve the order of Hash keys and values specified through :order!" do
       hash = { :find_user => { :name => "Lucy", :id => 666, :order! => [:id, :name] } }
-      result = "<findUser><id>666</id><name>Lucy</name></findUser>"
+      result = "<wsdl:findUser><wsdl:id>666</wsdl:id><wsdl:name>Lucy</wsdl:name></wsdl:findUser>"
       hash.to_soap_xml.should == result
 
       hash = { :find_user => { :mname => "in the", :lname => "Sky", :fname => "Lucy", :order! => [:fname, :mname, :lname] } }
-      result = "<findUser><fname>Lucy</fname><mname>in the</mname><lname>Sky</lname></findUser>"
+      result = "<wsdl:findUser><wsdl:fname>Lucy</wsdl:fname><wsdl:mname>in the</wsdl:mname><wsdl:lname>Sky</wsdl:lname></wsdl:findUser>"
       hash.to_soap_xml.should == result
     end
 
@@ -117,7 +117,7 @@ describe Hash do
 
     it "should add attributes to Hash keys specified through :attributes!" do
       hash = { :find_user => { :person => "Lucy", :attributes! => { :person => { :id => 666 } } } }
-      result = '<findUser><person id="666">Lucy</person></findUser>'
+      result = '<wsdl:findUser><wsdl:person id="666">Lucy</wsdl:person></wsdl:findUser>'
       hash.to_soap_xml.should == result
 
       hash = { :find_user => { :person => "Lucy", :attributes! => { :person => { :id => 666, :city => "Hamburg" } } } }
@@ -127,11 +127,11 @@ describe Hash do
 
     it "should add attributes to duplicate Hash keys specified through :attributes!" do
       hash = { :find_user => { :person => ["Lucy", "Anna"], :attributes! => { :person => { :id => [1, 3] } } } }
-      result = '<findUser><person id="1">Lucy</person><person id="3">Anna</person></findUser>'
+      result = '<wsdl:findUser><wsdl:person id="1">Lucy</wsdl:person><wsdl:person id="3">Anna</wsdl:person></wsdl:findUser>'
       hash.to_soap_xml.should == result
       
       hash = { :find_user => { :person => ["Lucy", "Anna"], :attributes! => { :person => { :active => "true" } } } }
-      result = '<findUser><person active="true">Lucy</person><person active="true">Anna</person></findUser>'
+      result = '<wsdl:findUser><wsdl:person active="true">Lucy</wsdl:person><wsdl:person active="true">Anna</wsdl:person></wsdl:findUser>'
       hash.to_soap_xml.should == result
     end
   end
