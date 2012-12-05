@@ -50,6 +50,7 @@ module Savon
     def initialize(endpoint, options = {})
       @endpoint = URI endpoint
       @proxy = URI options[:proxy] || ""
+      @options = options
       headers["Accept-encoding"] = "gzip,deflate" if options[:gzip]
     end
 
@@ -98,7 +99,10 @@ module Savon
 
     # Returns the Net::HTTP object.
     def http
-      @http ||= Net::HTTP::Proxy(@proxy.host, @proxy.port).new @endpoint.host, @endpoint.port
+      return @http if @http
+      @http = Net::HTTP::Proxy(@proxy.host, @proxy.port).new @endpoint.host, @endpoint.port
+      @http.ssl_version = @options[:ssl_version] if @options[:ssl_version]
+      @http
     end
 
   private
